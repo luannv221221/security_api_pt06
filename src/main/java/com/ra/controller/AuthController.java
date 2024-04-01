@@ -1,6 +1,8 @@
 package com.ra.controller;
 
+import com.ra.model.dto.request.UserLoginDTO;
 import com.ra.model.dto.request.UserRequestDTO;
+import com.ra.model.dto.response.UserLoginResponseDTO;
 import com.ra.model.dto.response.UserResponseDTO;
 import com.ra.model.entity.User;
 import com.ra.service.UserService;
@@ -18,5 +20,10 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody UserRequestDTO requestDTO){
         UserResponseDTO userResponseDTO= userService.register(requestDTO);
         return new ResponseEntity<>(userResponseDTO,HttpStatus.CREATED);
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginDTO userLoginDTO){
+        UserLoginResponseDTO userLoginResponseDTO = userService.login(userLoginDTO);
+        return new ResponseEntity<>(userLoginResponseDTO,HttpStatus.OK);
     }
 }

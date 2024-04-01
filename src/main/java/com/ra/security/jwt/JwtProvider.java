@@ -21,11 +21,12 @@ public class JwtProvider {
                 setSubject(userPrinciple.getUsername()).
                 setIssuedAt(new Date()).
                 setExpiration(new Date(new Date().getTime()+EXPIRED)).
-                signWith(SignatureAlgorithm.ES512,SECRET_KEY).compact();
+                signWith(SignatureAlgorithm.HS256,SECRET_KEY).compact();
         return token;
     }
 
     public Boolean validateToken(String token){
+
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             return true;

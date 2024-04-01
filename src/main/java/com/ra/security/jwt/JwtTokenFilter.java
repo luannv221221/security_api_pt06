@@ -24,6 +24,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token =getTokenFromRequest(request);
+
         try {
             if(token != null && jwtProvider.validateToken(token)){
                 String userName = jwtProvider.getUserNameFromToken(token);
@@ -36,14 +37,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e){
-            logger.error("un Authentication");
+            logger.error(e.getMessage());
         }
         filterChain.doFilter(request,response);
     }
     public String getTokenFromRequest(HttpServletRequest request){
         String header = request.getHeader("Authorization");
         //Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTIzNDU2Nzg5IiwiaWF0IjoxNzEwODM
-        if(header != null && header.startsWith("Bearer")){
+        if(header != null && header.startsWith("Bearer ")){
             return header.substring(7);
         }
         return null;
