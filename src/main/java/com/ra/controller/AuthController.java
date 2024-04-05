@@ -31,16 +31,7 @@ public class AuthController {
         return new ResponseEntity<>(userResponseDTO,HttpStatus.CREATED);
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO,BindingResult result){
-        if(result.hasErrors()){
-            List<String> list = new ArrayList<>();
-            for (FieldError fieldError : result.getFieldErrors()) {
-               list.add(fieldError.getDefaultMessage());
-            }
-
-            return new ResponseEntity<>
-                    (new ResponseValidate<>(400,"Badrequest",list),HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
         UserLoginResponseDTO userLoginResponseDTO = userService.login(userLoginDTO);
         return new ResponseEntity<>(userLoginResponseDTO,HttpStatus.OK);
     }
