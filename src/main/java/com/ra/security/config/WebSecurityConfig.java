@@ -1,5 +1,6 @@
 package com.ra.security.config;
 
+import com.ra.security.jwt.CustomAccessDeniedHandler;
 import com.ra.security.jwt.JwtEntryPoint;
 import com.ra.security.jwt.JwtTokenFilter;
 import com.ra.security.user_principal.UserDetailService;
@@ -17,6 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,16 +32,28 @@ public class WebSecurityConfig {
    private JwtTokenFilter jwtTokenFilter;
    @Autowired
    private JwtEntryPoint jwtEntryPoint;
+   @Autowired
+   private CustomAccessDeniedHandler customAccessDeniedHandler;
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
-        return httpSecurity.csrf(AbstractHttpConfigurer::disable).
+        return httpSecurity.
+                cors(auh->auh.configurationSource(request -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(List.of("http://127.0.0.1:5500/"));
+                    corsConfiguration.setAllowedMethods(List.of("*"));
+                    corsConfiguration.setAllowedHeaders(List.of("*"));
+                    return corsConfiguration;
+                })).
+                csrf(AbstractHttpConfigurer::disable).
                 authenticationProvider(authenticationProvider()).
                 authorizeHttpRequests((auth)->
                         auth.requestMatchers("/api/v1/auth/**").permitAll().
                                 requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN").
                                 requestMatchers("/api/v1/user/**").hasAuthority("USER").
                                 anyRequest().authenticated()).
-                exceptionHandling(auth->auth.authenticationEntryPoint(jwtEntryPoint)).
+                exceptionHandling(auth->
+                        auth.authenticationEntryPoint(jwtEntryPoint)
+                                .accessDeniedHandler(customAccessDeniedHandler)).
                 sessionManagement((auth)->auth.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
                 addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
